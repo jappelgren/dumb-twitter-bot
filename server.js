@@ -3,8 +3,10 @@ const app = Express();
 const PORT = 5000;
 const Twit = require('twit');
 const cron = require('node-cron');
-const fs = require('fs')
+const fs = require('fs');
 require('dotenv').config();
+
+const pool = require('./modules/pool.js');
 
 const consumer_key = process.env.API_KEY;
 const consumer_secret = process.env.API_SECRET_KEY;
@@ -20,28 +22,35 @@ const T = new Twit({
   strictSSL: true,
 });
 
-const imageTest = fs.readFileSync('images/gorilly.jpg', { encoding: 'base64' })
+const imageTest = fs.readFileSync('images/gorilly.jpg', { encoding: 'base64' });
 
+cron.schedule(' 1-59 * * * * *', async () => {
+  const image = await pool.query('SELECT * FROM images;');
+  const words = await pool.query('SELECT * FROM words;');
 
-cron.schedule(' 0 * * * * *', () => {
-    T.post('media/upload', { media_data: imageTest }, function (err, data, response) {
+  const randomImageIndex = Math.floor(Math.random() * (image.rows.length - 0) + 0)
+  const randomWordsIndex = Math.floor(Math.random() * (words.rows.length - 0) + 0)
+
+  await console.log(image.rows[randomImageIndex], words.rows[randomWordsIndex]);
+
+  // T.post('media/upload', { media_data: imageTest }, function (err, data, response) {
+
+  //     const mediaIdStr = data.media_id_string
+  //     const altText = "A powerful gorilly making a gd face."
+  //     const meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
+
+  //     T.post('media/metadata/create', meta_params, function (err, data, response) {
+  //       if (!err) {
+
+  //         const params = { status: 'Wow, what a gorilly.', media_ids: [mediaIdStr] }
+
+  //         T.post('statuses/update', params, function (err, data, response) {
+  //           console.log(data)
+  //         })
+  //       }
+  //     })
+  //   })
   
-        const mediaIdStr = data.media_id_string
-        const altText = "A powerful gorilly making a gd face."
-        const meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
-       
-        T.post('media/metadata/create', meta_params, function (err, data, response) {
-          if (!err) {
-            
-            const params = { status: 'Wow, what a gorilly.', media_ids: [mediaIdStr] }
-       
-            T.post('statuses/update', params, function (err, data, response) {
-              console.log(data)
-            })
-          }
-        })
-      })
-      console.log('metro boomin want some more.')
 });
 
 app.listen(PORT, () => {
