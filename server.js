@@ -1,12 +1,13 @@
 const Express = require('express');
 const app = Express();
-const PORT = 5000;
+
 const Twit = require('twit');
 const cron = require('node-cron');
 const fs = require('fs');
 require('dotenv').config();
 
 const pool = require('./modules/pool.js');
+const PORT = 5000;
 
 const consumer_key = process.env.API_KEY;
 const consumer_secret = process.env.API_SECRET_KEY;
@@ -22,8 +23,6 @@ const T = new Twit({
   strictSSL: true,
 });
 
-const imageTest = fs.readFileSync('images/gorilly.jpg', { encoding: 'base64' });
-
 cron.schedule(' 0,5,10,15,20,25,30,35,40,45,50,55 * * * * *', async () => {
   const image = await pool.query('SELECT * FROM images;');
   const words = await pool.query('SELECT * FROM words;');
@@ -35,7 +34,7 @@ cron.schedule(' 0,5,10,15,20,25,30,35,40,45,50,55 * * * * *', async () => {
     await T.post('media/upload', { media_data: fs.readFileSync(`images/${image.rows[randomImageIndex].image}`, { encoding: 'base64' }) }, async (err, data, response) => {
 
         const mediaIdStr = data.media_id_string
-        const altText = "An item which if you viewed it you would look at someone and say if you know, you know, or this item makes whatever I am experiencing right now \"hit different\""
+        const altText = "An item which if you viewed it you would look at someone and say \"if you know, you know\", or this item makes whatever I am experiencing right now \"hit different\""
         const meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
   
        await T.post('media/metadata/create', meta_params, async(err, data, response) => {
@@ -44,7 +43,7 @@ cron.schedule(' 0,5,10,15,20,25,30,35,40,45,50,55 * * * * *', async () => {
             const params = { status: `${words.rows[randomWordsIndex].tweet_text} 🍧`, media_ids: [mediaIdStr] }
   
             T.post('statuses/update', params, async (err, data, response) => {
-             await pool.query(`DELETE FROM images WHERE id = ${image.rows[randomImageIndex].id}`)
+             await pool.query(`DELETE FROM images WHERE id = ${image.rows[randomImageIndex].id};`)
             })
           }
         })
