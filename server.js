@@ -42,7 +42,7 @@ async function postTweet() {
        await T.post('media/metadata/create', meta_params, async(err, data, response) => {
           if (!err) {
   
-            const params = { status: `${words.rows[randomWordsIndex].tweet_text} 🍧`, media_ids: [mediaIdStr] }
+            const params = { status: `${words.rows[randomWordsIndex].tweet_text}`, media_ids: [mediaIdStr] }
   
             T.post('statuses/update', params, async (err, data, response) => {
              await pool.query(`DELETE FROM images WHERE id = ${image.rows[randomImageIndex].id};`)
