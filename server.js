@@ -23,10 +23,7 @@ const T = new Twit({
   strictSSL: true,
 });
 
-// cron.schedule(' 0,5,10,15,20,25,30,35,40,45,50,55 * * * * *', async () => {
 
-  
-// });
 async function postTweet() {
   const image = await pool.query('SELECT * FROM images;');
   const words = await pool.query('SELECT * FROM words;');
@@ -58,7 +55,9 @@ async function postTweet() {
   }
 }
 
-postTweet()
+cron.schedule(' 0,5,10,15,20,25,30,35,40,45,50,55 * * * * *', async () => {
+  postTweet()
+});
 
 
 
