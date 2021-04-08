@@ -46,6 +46,11 @@ async function postTweet() {
   
             T.post('statuses/update', params, async (err, data, response) => {
              await pool.query(`DELETE FROM images WHERE id = ${image.rows[randomImageIndex].id};`)
+             fs.unlink(`images/${image.rows[randomImageIndex].image}`, (err) => {
+              if (err) {
+                console.error(err)
+                return
+              }})
             })
           }
         })
