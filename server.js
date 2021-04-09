@@ -29,15 +29,16 @@ const T = new Twit({
 
 
 async function postTweet() {
-  const image = await pool.query('SELECT * FROM images;');
+  let image = await fs.readdirSync('./images');
   const words = await pool.query('SELECT * FROM words;');
   
-  const randomImageIndex = Math.floor(Math.random() * (image.rows.length - 0) + 0)
+  const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0)
   const randomWordsIndex = Math.floor(Math.random() * (words.rows.length - 0) + 0)
-  
-  if (image.rows.length > 0) {
+
+ 
+  if (image.length > 0) {
     
-    T.post('media/upload', { media_data: fs.readFileSync(`images/${image.rows[randomImageIndex].image}`, { encoding: 'base64' }) }, async (err, data, response) => {
+    T.post('media/upload', { media_data: fs.readFileSync(`images/${image[randomImageIndex]}`, { encoding: 'base64' }) }, async (err, data, response) => {
   
         const mediaIdStr = data.media_id_string
         const altText = "An item which if you viewed it you would look at someone and say \"if you know, you know\", or this item makes whatever I am experiencing right now \"hit different\""
@@ -49,8 +50,8 @@ async function postTweet() {
             const params = { status: `${words.rows[randomWordsIndex].tweet_text}`, media_ids: [mediaIdStr] }
   
             T.post('statuses/update', params, async (err, data, response) => {
-             await pool.query(`DELETE FROM images WHERE id = ${image.rows[randomImageIndex].id};`)
-             fs.unlink(`images/${image.rows[randomImageIndex].image}`, (err) => {
+             fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
+              image = fs.readdirSync('./images');
               if (err) {
                 console.error(err)
                 return
