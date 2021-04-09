@@ -30,10 +30,10 @@ const T = new Twit({
 
 async function postTweet() {
   let image = await fs.readdirSync('./images');
-  const words = await pool.query('SELECT * FROM words;');
+  const words = require('./tweetWords.js')
   
   const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0)
-  const randomWordsIndex = Math.floor(Math.random() * (words.rows.length - 0) + 0)
+  const randomWordsIndex = Math.floor(Math.random() * (words.length - 0) + 0)
 
  
   if (image.length > 0) {
@@ -47,7 +47,7 @@ async function postTweet() {
        await T.post('media/metadata/create', meta_params, async(err, data, response) => {
           if (!err) {
   
-            const params = { status: `${words.rows[randomWordsIndex].tweet_text}`, media_ids: [mediaIdStr] }
+            const params = { status: `${words[randomWordsIndex]}`, media_ids: [mediaIdStr] }
   
             T.post('statuses/update', params, async (err, data, response) => {
              fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
