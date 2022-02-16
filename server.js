@@ -6,7 +6,6 @@ const cron = require('node-cron');
 const fs = require('fs');
 require('dotenv').config();
 
-const pool = require('./modules/pool.js');
 const PORT = 5000;
 
 const consumer_key = process.env.API_KEY;
