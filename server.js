@@ -8,6 +8,8 @@ require('dotenv').config();
 
 const PORT = 5000;
 
+const search = require('./imageSearch');
+
 const consumer_key = process.env.API_KEY;
 const consumer_secret = process.env.API_SECRET_KEY;
 const access_token = process.env.ACCESS_TOKEN;
@@ -26,54 +28,66 @@ const T = new Twit({
   strictSSL: true,
 });
 
+let image = fs.readdirSync('./images');
 
 async function postTweet() {
-  let image = await fs.readdirSync('./images');
   const words = require('./tweetWords.js')
-  
+
   const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0)
   const randomWordsIndex = Math.floor(Math.random() * (words.length - 0) + 0)
 
- 
+
   if (image.length > 0) {
-    
+
     T.post('media/upload', { media_data: fs.readFileSync(`images/${image[randomImageIndex]}`, { encoding: 'base64' }) }, async (err, data, response) => {
-  
-        const mediaIdStr = data.media_id_string
-        const altText = "An item which if you viewed it you would look at someone and say \"if you know, you know\", or this item makes whatever I am experiencing right now \"hit different\""
-        const meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
-  
-       await T.post('media/metadata/create', meta_params, async(err, data, response) => {
-          if (!err) {
-  
-            const params = { status: `${words[randomWordsIndex]}`, media_ids: [mediaIdStr] }
-  
-            T.post('statuses/update', params, async (err, data, response) => {
-             fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
+
+      const mediaIdStr = data.media_id_string
+      const altText = "An item which if you viewed it you would look at someone and say \"if you know, you know\", or this item makes whatever I am experiencing right now \"hit different\""
+      const meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
+
+      await T.post('media/metadata/create', meta_params, async (err, data, response) => {
+        if (!err) {
+
+          const params = { status: `${words[randomWordsIndex]}`, media_ids: [mediaIdStr] }
+
+          T.post('statuses/update', params, async (err, data, response) => {
+            fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
               image = fs.readdirSync('./images');
               if (err) {
                 console.error(err)
                 return
-              }})
+              }
             })
-          }
-        })
+          })
+        }
       })
+    })
   } else {
-      console.log('No images in database')
-      client.messages
-  .create({
-     body: 'Your dumb Twitter joke bot is out of images!  Add some to keep that funny joke going!',
-     from: process.env.TWILIO_PHONE_NUMBER,
-     to: process.env.ADMIN_PHONE_NUMBER
-   })
-  .then(message => console.log(message.sid));
+    console.log('No images in database')
+    client.messages
+      .create({
+        body: 'Your dumb Twitter joke bot is out of images!  Add some to keep that funny joke going!',
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: process.env.ADMIN_PHONE_NUMBER
+      })
+      .then(message => console.log(message.sid));
   }
 }
 
 cron.schedule('0 0 12 * * *', async () => {
   postTweet()
 });
+
+cron.schedule('0 4 * * * 1', async () => {
+  const timer = ms => new Promise(res => setTimeout(res, ms))
+  if (image.length < 1000) {
+    for (let i = 0; i < 10; i++) {
+      imageSearch()
+      await timer(3000)
+    }
+
+  }
+})
 
 
 

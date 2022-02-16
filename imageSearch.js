@@ -6,7 +6,7 @@ const searchTerm = require('./imageSearchTerms.js')
 const search = async () => {
     const result = await google.image(searchTerm(), { safe: false });
     const urlToQuery = Math.floor(Math.random() * result.length)
-    let fileExtension = result[urlToQuery].url.slice(-4)
+    let fileExtension = await result[urlToQuery]?.url.slice(-4)
 
     console.log(fileExtension)
     if (fileExtension !== '.gif' && fileExtension !== '.png') {
@@ -26,5 +26,16 @@ const search = async () => {
 
 
 }
+const searchLoop = async () => {
+    const timer = ms => new Promise(res => setTimeout(res, ms))
+    // if (image.length < 1000) {
+        for (let i = 0; i < 10; i++) {
+            search()
+            await timer(5000)
+        }
+    // }
+}
 
-search();
+searchLoop()
+
+module.exports = search
