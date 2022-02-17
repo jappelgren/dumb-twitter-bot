@@ -84,7 +84,7 @@ cron.schedule('0 7,19 * * *', async () => {
 
 cron.schedule('0 1,3,5,9,11,13,15,17,21,23 * * *', async () => {
   if (image.length < 365) {
-      search();
+    search();
   }
 });
 
