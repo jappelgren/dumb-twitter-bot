@@ -1,41 +1,60 @@
 const google = require('googlethis');
 const fs = require('fs');
-const axios = require('axios')
-const searchTerm = require('./imageSearchTerms.js')
+const axios = require('axios');
+const searchTerm = require('./imageSearchTerms.js');
+
+const saveImage = async (result, urlToQuery, fileExtension) => {
+  const file = fs.createWriteStream(
+    `./images/${Math.floor(Math.random() * 100000000)}${fileExtension}`
+  );
+  try {
+    if (fileExtension !== 'undefined') {
+      const response = await axios.get(result[urlToQuery].url, {
+        responseType: 'stream',
+      });
+      await response.data.pipe(file);
+    }
+  } catch (error) {
+    console.log(error.response);
+  }
+};
 
 const search = async () => {
-    const result = await google.image(searchTerm(), { safe: false });
-    const urlToQuery = Math.floor(Math.random() * result.length)
-    let fileExtension = await result[urlToQuery]?.url.slice(-4)
+  let result = await google.image(searchTerm(), { safe: false });
+  let urlToQuery;
+  let fileExtension;
+  let count = 0;
 
-    console.log(fileExtension)
-    if (fileExtension !== '.gif' && fileExtension !== '.png') {
-        fileExtension = '.jpg'
+  while (fileExtension === undefined) {
+    urlToQuery = Math.floor(Math.random() * result.length);
+    fileExtension = await result[urlToQuery]?.url.slice(-4);
+    count++;
+
+    if (count === 10) {
+      result = await google.image(searchTerm(), { safe: false });
+      count = 0
     }
+  }
 
-    const file = fs.createWriteStream(`./images/${Math.floor(Math.random() * 100000000)}${fileExtension}`);
-    try {
-        const response = await axios.get(
-            result[urlToQuery].url,
-            { responseType: 'stream' }
-        );
-        await response.data.pipe(file);
-    } catch (error) {
-        console.log(error)
+  if (
+    fileExtension?.charAt(0) === '.' ||
+    fileExtension?.toLowerCase() === 'webp'
+  ) {
+    if (
+      fileExtension?.toLowerCase() === '.gif' ||
+      fileExtension?.toLowerCase() === '.png' ||
+      fileExtension?.toLowerCase() === '.jpg' ||
+      fileExtension?.toLowerCase() === '.jpeg'
+    ) {
+      await saveImage(result, urlToQuery, fileExtension);
+      return;
+    } else if (fileExtension?.toLowerCase() === 'webp') {
+      fileExtension = '.jpg';
+      await saveImage(result, urlToQuery, fileExtension);
+      return;
     }
+    console.log('Skipping');
+  }
+};
 
-
-}
-const searchLoop = async () => {
-    const timer = ms => new Promise(res => setTimeout(res, ms))
-    // if (image.length < 1000) {
-        for (let i = 0; i < 10; i++) {
-            search()
-            await timer(5000)
-        }
-    // }
-}
-
-searchLoop()
-
-module.exports = search
+module.exports = search;

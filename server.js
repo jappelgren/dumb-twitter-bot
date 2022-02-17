@@ -31,65 +31,73 @@ const T = new Twit({
 let image = fs.readdirSync('./images');
 
 async function postTweet() {
-  const words = require('./tweetWords.js')
+  const words = require('./tweetWords.js');
 
-  const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0)
-  const randomWordsIndex = Math.floor(Math.random() * (words.length - 0) + 0)
-
+  const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0);
+  const randomWordsIndex = Math.floor(Math.random() * (words.length - 0) + 0);
 
   if (image.length > 0) {
+    T.post(
+      'media/upload',
+      {
+        media_data: fs.readFileSync(`images/${image[randomImageIndex]}`, {
+          encoding: 'base64',
+        }),
+      },
+      async (err, data, response) => {
+        const mediaIdStr = data.media_id_string;
+        const altText =
+          'An item which if you viewed it you would look at someone and say "if you know, you know", or this item makes whatever I am experiencing right now "hit different"';
+        const meta_params = {
+          media_id: mediaIdStr,
+          alt_text: { text: altText },
+        };
 
-    T.post('media/upload', { media_data: fs.readFileSync(`images/${image[randomImageIndex]}`, { encoding: 'base64' }) }, async (err, data, response) => {
+        await T.post(
+          'media/metadata/create',
+          meta_params,
+          async (err, data, response) => {
+            if (!err) {
+              const params = {
+                status: `${words[randomWordsIndex]}`,
+                media_ids: [mediaIdStr],
+              };
 
-      const mediaIdStr = data.media_id_string
-      const altText = "An item which if you viewed it you would look at someone and say \"if you know, you know\", or this item makes whatever I am experiencing right now \"hit different\""
-      const meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
-
-      await T.post('media/metadata/create', meta_params, async (err, data, response) => {
-        if (!err) {
-
-          const params = { status: `${words[randomWordsIndex]}`, media_ids: [mediaIdStr] }
-
-          T.post('statuses/update', params, async (err, data, response) => {
-            fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
-              image = fs.readdirSync('./images');
-              if (err) {
-                console.error(err)
-                return
-              }
-            })
-          })
-        }
-      })
-    })
+              T.post('statuses/update', params, async (err, data, response) => {
+                fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
+                  image = fs.readdirSync('./images');
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                });
+              });
+            }
+          }
+        );
+      }
+    );
   } else {
-    console.log('No images in database')
+    console.log('No images in database');
     client.messages
       .create({
         body: 'Your dumb Twitter joke bot is out of images!  Add some to keep that funny joke going!',
         from: process.env.TWILIO_PHONE_NUMBER,
-        to: process.env.ADMIN_PHONE_NUMBER
+        to: process.env.ADMIN_PHONE_NUMBER,
       })
-      .then(message => console.log(message.sid));
+      .then((message) => console.log(message.sid));
   }
 }
 
-cron.schedule('0 0 12 * * *', async () => {
-  postTweet()
+cron.schedule('0 7,19 * * *', async () => {
+  postTweet();
 });
 
-cron.schedule('0 4 * * * 1', async () => {
-  const timer = ms => new Promise(res => setTimeout(res, ms))
-  if (image.length < 1000) {
-    for (let i = 0; i < 10; i++) {
-      imageSearch()
-      await timer(3000)
-    }
-
+cron.schedule('0 1,3,5,7,9,11,13,15,17,19,21,23 * * *', async () => {
+  if (image.length < 365) {
+      search();
   }
-})
-
-
+});
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
