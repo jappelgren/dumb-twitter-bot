@@ -15,10 +15,6 @@ const consumer_secret = process.env.API_SECRET_KEY;
 const access_token = process.env.ACCESS_TOKEN;
 const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
-
 const T = new Twit({
   consumer_key: consumer_key,
   consumer_secret: consumer_secret,
@@ -78,14 +74,7 @@ async function postTweet() {
       }
     );
   } else {
-    console.log('No images in database');
-    client.messages
-      .create({
-        body: 'Your dumb Twitter joke bot is out of images!  Add some to keep that funny joke going!',
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: process.env.ADMIN_PHONE_NUMBER,
-      })
-      .then((message) => console.log(message.sid));
+    console.log('No images to post');
   }
 }
 

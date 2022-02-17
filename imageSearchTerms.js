@@ -77,7 +77,6 @@ const nouns = [
     'computer',
     'school',
     'monster',
-    'obscure star wars action figure',
     'alien',
     'gun',
     'food product',
