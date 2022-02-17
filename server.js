@@ -90,4 +90,5 @@ cron.schedule('0 1,3,5,9,11,13,15,17,21,23 * * *', async () => {
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
+  console.log('About to show these people about knowing if they know.')
 });
