@@ -39,7 +39,7 @@ const adjectives = [
   'homemade',
   'diy',
   'churlish',
-  
+
 ];
 
 const nouns = [
@@ -326,6 +326,5 @@ const searchTerm = () => {
   
   return searchTerm;
 };
-searchTerm()
 
 module.exports = searchTerm;
