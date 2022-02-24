@@ -17,8 +17,6 @@ const adjectives = [
   'stupid',
   'tiny',
   'huge',
-  'gold',
-  'huge gold',
   'antique',
   'pristine',
   'new in box',
@@ -35,6 +33,7 @@ const adjectives = [
   'subterainian',
   'small town',
   'youthful',
+  'cockamamie'
 ];
 
 const nouns = [
