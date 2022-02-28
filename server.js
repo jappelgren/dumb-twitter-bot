@@ -27,7 +27,7 @@ const T = new Twit({
 
 let image = fs.readdirSync("./images");
 
-async function postTweet() {
+export async function postTweet() {
   const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0);
   const randomWordsIndex = Math.floor(Math.random() * (words.length - 0) + 0);
 
