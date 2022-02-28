@@ -1,14 +1,15 @@
-const Express = require('express');
-const app = Express();
+import Express from "express";
+import Twit from "twit";
+import cron from "node-cron";
+import fs from "fs";
+import dotenv from "dotenv";
+import { search } from "./utils/imageSearch.js";
+import { words } from "./variables/tweetWords.js";
 
-const Twit = require('twit');
-const cron = require('node-cron');
-const fs = require('fs');
-require('dotenv').config();
+const app = Express();
+dotenv.config();
 
 const PORT = 5000;
-
-const search = require('./imageSearch');
 
 const consumer_key = process.env.API_KEY;
 const consumer_secret = process.env.API_SECRET_KEY;
@@ -24,20 +25,18 @@ const T = new Twit({
   strictSSL: true,
 });
 
-let image = fs.readdirSync('./images');
+let image = fs.readdirSync("./images");
 
 async function postTweet() {
-  const words = require('./tweetWords.js');
-
   const randomImageIndex = Math.floor(Math.random() * (image.length - 0) + 0);
   const randomWordsIndex = Math.floor(Math.random() * (words.length - 0) + 0);
 
   if (image.length > 0) {
     T.post(
-      'media/upload',
+      "media/upload",
       {
         media_data: fs.readFileSync(`images/${image[randomImageIndex]}`, {
-          encoding: 'base64',
+          encoding: "base64",
         }),
       },
       async (err, data, response) => {
@@ -50,7 +49,7 @@ async function postTweet() {
         };
 
         await T.post(
-          'media/metadata/create',
+          "media/metadata/create",
           meta_params,
           async (err, data, response) => {
             if (!err) {
@@ -59,9 +58,9 @@ async function postTweet() {
                 media_ids: [mediaIdStr],
               };
 
-              T.post('statuses/update', params, async (err, data, response) => {
+              T.post("statuses/update", params, async (err, data, response) => {
                 fs.unlink(`images/${image[randomImageIndex]}`, (err) => {
-                  image = fs.readdirSync('./images');
+                  image = fs.readdirSync("./images");
                   if (err) {
                     console.error(err);
                     return;
@@ -74,15 +73,15 @@ async function postTweet() {
       }
     );
   } else {
-    console.log('No images to post');
+    console.log("No images to post");
   }
 }
 
-cron.schedule('0 7,19 * * *', async () => {
+cron.schedule("0 7,19 * * *", async () => {
   postTweet();
 });
 
-cron.schedule('0 1,3,5,9,11,13,15,17,21,23 * * *', async () => {
+cron.schedule("0 1,3,5,9,11,13,15,17,21,23 * * *", async () => {
   if (image.length < 365) {
     search();
   }
@@ -90,5 +89,5 @@ cron.schedule('0 1,3,5,9,11,13,15,17,21,23 * * *', async () => {
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
-  console.log('About to show these people about knowing if they know.')
+  console.log("About to show these people about knowing if they know.");
 });
