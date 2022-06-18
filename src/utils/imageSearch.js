@@ -22,7 +22,7 @@ const searchTerm = () => {
 
 const saveImage = async (result, urlToQuery, fileExtension) => {
   const file = fs.createWriteStream(
-    `./images/${Math.floor(Math.random() * 100000000)}${fileExtension}`
+    `/images/${Math.floor(Math.random() * 100000000)}${fileExtension}`
   );
   try {
     if (fileExtension !== "undefined") {

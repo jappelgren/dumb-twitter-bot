@@ -25,7 +25,7 @@ const T = new Twit({
   strictSSL: true,
 });
 
-let image = fs.readdirSync("./images");
+let image = fs.readdirSync("~/images");
 
 export async function postTweet() {
   const randomImageIndex = Math.floor(Math.random() * (image.length ));
